@@ -6,6 +6,15 @@ App.jsx
 Counter.jsx
 Batsman.jsx
 
+Summary.jsx
+
+Users.jsx
+Friends.jsx
+Friends.jsx
+
+Posts.jsx
+Post.jsx
+
 
 ```
 
@@ -461,7 +470,328 @@ const [count, setCount] = useState(0);
 4. **Counter** — সংখ্যা increase বা decrease করতে।
 5. **Store API Data** — API থেকে পাওয়া data state-এ সংরক্ষণ করতে।
 
+</details><br>
+
+
+
+
+
+
+
+
+
+
+
+
+### React-এ Suspense কী?
+
+`<Suspense>` হলো React-এর একটি built-in component, যা এর children-এর content load হওয়ার সময় একটি বিকল্প UI দেখায়। `fallback` prop ব্যবহার করে loading message, spinner বা skeleton UI দেখানো যায়। Content প্রস্তুত হলে React মূল UI প্রদর্শন করে। এটি সাধারণত `lazy()` ব্যবহার করে component-এর code প্রয়োজনের সময় load করার ক্ষেত্রে ব্যবহৃত হয়। তবে এটি সাধারণ `fetch()` API request-এর loading স্বয়ংক্রিয়ভাবে handle করে না।
+
+```
+import { Suspense } from "react";
+
+<Suspense fallback={<p>Loading...</p>}>
+  <SomeComponent />
+</Suspense>
+```
+
+
+
+
+**Q: What is `use` in React? Is it a Hook?**
+use is a React API that lets you read a resource during rendering, such as a Promise or context.
+
+**Answer:** React-এর `use` হলো একটি API, যা component render হওয়ার সময় `Promise` বা `Context` থেকে value পড়তে সাহায্য করে। এটি সাধারণ Hook নয়, তবে Hook-এর মতো কাজ করে। সাধারণ Hook-এর মতো `use`-কে শুধু top level-এ ব্যবহার করতে হয় না; এটি condition ও loop-এর মধ্যেও ব্যবহার করা যায়।
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+### || `Load Data` (Examples)
+
+
+
+
+<details>
+<summary>📌 Example: React use() with Suspense — App.jsx & Users.jsx</summary>
+
+**App.jsx**
+```jsx
+import { Suspense } from 'react';
+import Users from './Users';
+
+const fetchUsers = fetch("https://jsonplaceholder.typicode.com/users")
+    .then(res => res.json());
+
+function App() {
+    return (
+        <>
+            <h2>React Core Concepts (ii)</h2>
+            <Suspense fallback={<h3>Loading........</h3>}>
+                <Users fetchUsers={fetchUsers} />
+            </Suspense>
+        </>
+    );
+}
+
+export default App;
+```
+
+**Users.jsx**
+```jsx
+import { use } from "react";
+
+export default function Users({ fetchUsers }) {
+    const users = use(fetchUsers);
+    // use(fetchUsers) থেকে users array পাওয়া যাচ্ছে।
+    // [{...}, {...}, {...}, ...]
+
+    return (
+        <div className="card">
+            <h3>Users: {users.length}</h3>
+        </div>
+    );
+}
+```
+
+**সংক্ষিপ্ত ব্যাখ্যা:**
+- **App.jsx:** API থেকে users-এর data fetch করে Promise-টি `props` হিসেবে `Users` component-এ পাঠানো হয়েছে। `<Suspense>` component suspend হলে fallback UI প্রদর্শন করে।
+- **Users.jsx:** `use(fetchUsers)` ব্যবহার করে Promise-এর resolved data পড়া হয়েছে এবং `users.length` দিয়ে মোট users-এর সংখ্যা প্রদর্শন করা হয়েছে।
+
+**Execution Flow:** API Request → Promise → Props → `use()` → Users Array → UI Render
+
 </details>
+
+
+
+
+
+
+
+ <details>
+<summary>📌 Example: React use() with Suspense — App.jsx & Friends.jsx</summary>
+
+**App.jsx**
+
+    import { Suspense } from 'react';
+    import Friends from './Friends';
+
+    const fetchFriends = async () => {
+      const res = await fetch("https://jsonplaceholder.typicode.com/users");
+      return res.json();
+    };
+
+    function App() {
+      const friendsPromise = fetchFriends();
+
+      return (
+        <>
+          <h2>React Core Concepts (ii)</h2>
+          <Suspense fallback={<h3>Friends are coming......</h3>}>
+            <Friends friendsPromise={friendsPromise} />
+          </Suspense>
+        </>
+      );
+    }
+
+    export default App;
+
+**Friends.jsx**
+
+    import { use } from "react";
+
+    export default function Friends({ friendsPromise }) {
+      const friends = use(friendsPromise);
+      console.log(friends);
+
+      return (
+        <div className="card">
+          <h3>Friends : {friends.length}</h3>
+        </div>
+      );
+    }
+
+**সংক্ষিপ্ত ব্যাখ্যা:**
+
+- **App.jsx:** `fetchFriends()` API থেকে friends-এর data fetch করে একটি Promise return করে। Promise-টি `friendsPromise` নামে `Friends` component-এ `props` হিসেবে পাঠানো হয়েছে। `Suspense` data resolve হওয়ার জন্য অপেক্ষার সময় fallback UI প্রদর্শন করে।
+- **Friends.jsx:** `use(friendsPromise)` ব্যবহার করে Promise-এর resolved data পাওয়া হয়েছে। `friends.length` দিয়ে মোট friends-এর সংখ্যা দেখানো হয়েছে।
+
+**Execution Flow:** API Request → Promise → Props → `use()` → Friends Array → UI Render
+
+</details>
+
+
+
+
+
+
+### || `Load Data` & `Display Data` 
+
+
+
+ <details>
+<summary>📌 Example: React use() with Suspense — App.jsx, Friends.jsx & Friend.jsx</summary>
+
+**App.jsx**
+
+    import { Suspense } from 'react';
+    import Friends from './Friends';
+
+    const fetchFriends = async () => {
+      const res = await fetch("https://jsonplaceholder.typicode.com/users");
+      return res.json();
+    };
+
+    function App() {
+      const friendsPromise = fetchFriends();
+
+      return (
+        <>
+          <h2>React Core Concepts (ii)</h2>
+          <Suspense fallback={<h3>Friends are coming......</h3>}>
+            <Friends friendsPromise={friendsPromise} />
+          </Suspense>
+        </>
+      );
+    }
+
+    export default App;
+
+**Friends.jsx**
+
+    import { use } from "react";
+    import Friend from "./Friend";
+
+    export default function Friends({ friendsPromise }) {
+      const friends = use(friendsPromise);
+      console.log(friends);
+
+      return (
+        <div className="card">
+          <h3>Friends : {friends.length}</h3>
+          {/* To show in UI */}
+          {friends.map(friend => (
+            <Friend key={friend.id} friend={friend} />
+          ))}
+        </div>
+      );
+    }
+
+**Friend.jsx**
+
+    export default function Friend({ friend }) {
+      const { name, email, phone, website } = friend;
+
+      return (
+        <div className="card-inner">
+          <h3>Name : {name}</h3>
+          <p>Email : {email}</p>
+          <p>Website : {website}</p>
+        </div>
+      );
+    }
+
+**সংক্ষিপ্ত ব্যাখ্যা:**
+
+- **App.jsx:** API থেকে friends-এর data fetch করে Promise-টি `friendsPromise` prop হিসেবে `Friends` component-এ পাঠানো হয়েছে। `Suspense` data load হওয়ার সময় fallback UI দেখায়।
+- **Friends.jsx:** `use(friendsPromise)` দিয়ে API-এর resolved data পাওয়া হয়েছে। `friends.length` দিয়ে মোট friends-এর সংখ্যা দেখানো হয়েছে এবং `map()` ব্যবহার করে প্রতিটি friend-এর জন্য `Friend` component render করা হয়েছে। `key={friend.id}` প্রতিটি component-কে unique identity দেয়।
+- **Friend.jsx:** `friend` prop থেকে `name`, `email`, `phone` ও `website` destructuring করা হয়েছে। এরপর প্রতিটি friend's name, email ও website UI-তে দেখানো হয়েছে। `phone` নেওয়া হলেও বর্তমান UI-তে প্রদর্শন করা হয়নি।
+
+**Execution Flow:** API Request → Promise → Props → `use()` → Friends Array → `map()` → `Friend` Component → Data Display
+
+</details> <br>
+
+
+
+
+
+
+
+
+
+
+ <details>
+<summary>📌 Example: React use() with Suspense — App.jsx, Posts.jsx & Post.jsx</summary>
+
+**App.jsx**
+
+    import { Suspense } from 'react';
+    import Posts from './Posts';
+
+    const fetchPosts = async () => {
+      const res = await fetch("https://jsonplaceholder.typicode.com/posts");
+      return res.json();
+    };
+
+    function App() {
+      const postsPromise = fetchPosts();
+
+      return (
+        <>
+          <h2>React Core Concepts (ii)</h2>
+          <Suspense fallback={<h3>Posts are loading......</h3>}>
+            <Posts postsPromise={postsPromise} />
+          </Suspense>
+        </>
+      );
+    }
+
+    export default App;
+
+**Posts.jsx**
+
+    import { use } from "react";
+    import Post from "./Post";
+
+    export default function Posts({ postsPromise }) {
+      const posts = use(postsPromise);
+      // console.log(posts); // 100 ~ [{...}, {...}]
+
+      return (
+        <div className="card">
+          <h3>All Posts are here</h3>
+          {posts.map(post => (
+            <Post key={post.id} post={post} />
+          ))}
+        </div>
+      );
+    }
+
+**Post.jsx**
+
+    export default function Post({ post }) {
+      const { body, id, title, userId } = post;
+
+      return (
+        <div className="card-inner">
+          <h4>Title : {title}</h4>
+          <h5>Body : {body}</h5>
+          <p>UserID : {userId} ~ ID : {id}</p>
+        </div>
+      );
+    }
+
+**সংক্ষিপ্ত ব্যাখ্যা:**
+
+- **App.jsx:** `fetchPosts()` API থেকে posts-এর data fetch করে একটি Promise return করে। `postsPromise` prop হিসেবে `Posts` component-এ পাঠানো হয়েছে। `Suspense` component suspend হলে fallback UI দেখায়।
+- **Posts.jsx:** `use(postsPromise)` দিয়ে Promise-এর resolved data পাওয়া হয়েছে। `map()` ব্যবহার করে প্রতিটি post-এর জন্য `Post` component render করা হয়েছে। `key={post.id}` প্রতিটি post-এর জন্য unique key নির্ধারণ করে।
+- **Post.jsx:** `post` prop থেকে `body`, `id`, `title` ও `userId` destructuring করে প্রতিটি post-এর তথ্য UI-তে দেখানো হয়েছে।
+
+**Execution Flow:** API Request → Promise → Props → `use()` → Posts Array → `map()` → `Post` Component → Data Display
+
+</details>
+
+
+
+
 
 
 
