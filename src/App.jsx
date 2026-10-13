@@ -7,6 +7,7 @@ import Friends from './Friends';
 import Posts from './Posts';
 
 import Players from './Players';
+import Comments from './Comments';
 
 
 
@@ -51,6 +52,8 @@ function App() {
       <h2>React Core Concepts (ii)</h2>
 
 
+
+      <Comments></Comments>
       <Players></Players>
 
       <Suspense fallback={<h3>Posts are loading......</h3>}>
