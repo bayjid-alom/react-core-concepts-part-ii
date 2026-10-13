@@ -9,7 +9,7 @@
 
 
 // 1. API : Url: https://jsonplaceholder.typicode.com/users
- 
+
 /***
  * 1. Just write a simple fetch with json conversion
  * 2. Wrap the data loading component under sunspense
@@ -32,3 +32,15 @@ const loadData = async () => {
     const data = await res.json()
     return data;
 }   **/
+
+
+
+
+
+/***
+ * 1. Event trigger
+ * 2. state
+ * 3. Data load from API
+ * 4. loop through to display data
+ * 5. why we use key props
+ */

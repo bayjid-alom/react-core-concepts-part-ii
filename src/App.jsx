@@ -6,6 +6,8 @@ import { Suspense } from 'react';
 import Friends from './Friends';
 import Posts from './Posts';
 
+import Players from './Players';
+
 
 
 const fetchUsers = fetch("https://jsonplaceholder.typicode.com/users")
@@ -49,6 +51,7 @@ function App() {
       <h2>React Core Concepts (ii)</h2>
 
 
+      <Players></Players>
 
       <Suspense fallback={<h3>Posts are loading......</h3>}>
         <Posts postsPromise={postsPromise}></Posts>
